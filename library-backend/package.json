@@ -4,6 +4,8 @@
   "description": "GraphQL backend for simple library",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Oskari Holopainen",
@@ -11,5 +13,8 @@
   "dependencies": {
     "apollo-server": "^2.17.0",
     "graphql": "^15.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
   }
 }
