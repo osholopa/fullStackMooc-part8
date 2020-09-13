@@ -1,29 +1,29 @@
-import React, { useState } from "react";
-import { useMutation } from "@apollo/client";
-import { EDIT_AUTHOR, ALL_AUTHORS } from "../queries";
+import React, { useState } from 'react'
+import { useMutation } from '@apollo/client'
+import { EDIT_AUTHOR, ALL_AUTHORS } from '../queries'
 
 const Authors = (props) => {
-  const [name, setName] = useState('');
-  const [born, setBorn] = useState('');
+  const [name, setName] = useState('')
+  const [born, setBorn] = useState('')
 
-  const authors = props.authors;
+  const authors = props.authors
 
   const [editAuthor] = useMutation(EDIT_AUTHOR, {
     refetchQueries: [{ query: ALL_AUTHORS }],
     onError: (error) => {
-      console.log(error.graphQLErrors);
+      console.log(error.graphQLErrors)
     },
-  });
+  })
 
   const update = (event) => {
-    event.preventDefault();
-    editAuthor({ variables: { name, born } });
-    setName('');
-    setBorn('');
-  };
+    event.preventDefault()
+    editAuthor({ variables: { name, born } })
+    setName('')
+    setBorn('')
+  }
 
   if (!props.show) {
-    return null;
+    return null
   }
   return (
     <div>
@@ -52,7 +52,7 @@ const Authors = (props) => {
           <select
             value={name}
             onChange={({ target }) => {
-              setName(target.value);
+              setName(target.value)
             }}
           >
             {authors.map((a) => (
@@ -65,15 +65,15 @@ const Authors = (props) => {
         <div>
           born
           <input
-            type='number'
+            type="number"
             value={born}
             onChange={({ target }) => setBorn(Number(target.value))}
           />
         </div>
-        <button type='submit'>update author</button>
+        <button type="submit">update author</button>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default Authors;
+export default Authors
