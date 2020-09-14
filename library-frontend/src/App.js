@@ -8,6 +8,7 @@ import { ALL_AUTHORS, ALL_BOOKS } from './queries'
 
 const App = () => {
   const [page, setPage] = useState('authors')
+  const [error, setError] = useState(null)
   const authors = useQuery(ALL_AUTHORS)
   const books = useQuery(ALL_BOOKS)
 
@@ -23,11 +24,13 @@ const App = () => {
         <button onClick={() => setPage('add')}>add book</button>
       </div>
 
+      {error ? <div style={{ color: 'red' }}>{error}</div> : null}
+
       <Authors show={page === 'authors'} authors={authors.data.allAuthors} />
 
       <Books show={page === 'books'} books={books.data.allBooks} />
 
-      <NewBook show={page === 'add'} />
+      <NewBook show={page === 'add'} setError={setError} />
     </div>
   )
 }
