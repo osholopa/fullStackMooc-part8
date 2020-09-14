@@ -47,7 +47,7 @@ const resolvers = {
   Author: {
     bookCount: async (root) => {
       let books = await Book.find({}).populate('author', { name: 1, born: 1 })
-      return books.filter((book) => book.author === root.name).length
+      return books.filter((book) => book.author.name === root.name).length
     },
   },
   Mutation: {
