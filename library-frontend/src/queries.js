@@ -69,3 +69,12 @@ export const ALL_GENRES = gql`
     allGenres
   }
 `
+
+export const ME = gql`
+  query {
+    me {
+      username
+      favouriteGenre
+    }
+  }
+`

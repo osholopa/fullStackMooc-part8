@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import Booklist from './Booklist'
 
 const Books = ({ show, books, genres }) => {
   const [genre, setGenre] = useState(null)
@@ -24,22 +25,7 @@ const Books = ({ show, books, genres }) => {
           in genre <b>{genre}</b>
         </p>
       ) : null}
-      <table>
-        <tbody>
-          <tr>
-            <th></th>
-            <th>author</th>
-            <th>published</th>
-          </tr>
-          {booksToShow.map((a) => (
-            <tr key={a.title}>
-              <td>{a.title}</td>
-              <td>{a.author.name}</td>
-              <td>{a.published}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <Booklist books={booksToShow} />
       {genres.map((genre) => (
         <button
           onClick={() => {
