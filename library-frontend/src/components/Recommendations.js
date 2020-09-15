@@ -2,7 +2,7 @@ import React from 'react'
 import Booklist from './Booklist'
 
 const Recommendations = ({ show, favouriteGenre, favouriteBooks }) => {
-  if (!show) return null
+  if (!show || !favouriteGenre || !favouriteBooks) return null
 
   return (
     <div>

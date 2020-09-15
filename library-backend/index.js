@@ -34,7 +34,11 @@ const resolvers = {
     bookCount: () => Book.collection.countDocuments(),
     authorCount: () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
-      let books = await Book.find({}).populate('author', { name: 1, born: 1 })
+      let books = await Book.find({}).populate('author', {
+        name: 1,
+        born: 1,
+        bookCount: 1,
+      })
       if (!args.author && !args.genre) return books
       if (args.author)
         books = books.filter((b) => b.author.name === args.author)
@@ -58,12 +62,6 @@ const resolvers = {
       return context.currentUser
     },
   },
-  Author: {
-    bookCount: async (root) => {
-      let books = await Book.find({}).populate('author', { name: 1, born: 1 })
-      return books.filter((book) => book.author.name === root.name).length
-    },
-  },
   Mutation: {
     addBook: async (root, args, { currentUser }) => {
       if (!currentUser) throw new AuthenticationError('not authenticated')
@@ -71,14 +69,19 @@ const resolvers = {
       const author = await Author.findOne({ name: args.author })
       try {
         if (!author) {
-          const newAuthor = new Author({ name: args.author })
+          const newAuthor = new Author({ name: args.author, bookCount: 1 })
           await newAuthor.save()
           let book = new Book({ ...args, author: newAuthor })
           await book.save()
           pubsub.publish('BOOK_ADDED', { bookAdded: book })
           return book
         }
-        let book = new Book({ ...args, author: author })
+        const updatedAuthor = await Author.findByIdAndUpdate(
+          author.id,
+          { $inc: { bookCount: 1 } },
+          { new: true }
+        )
+        let book = new Book({ ...args, author: updatedAuthor })
         await book.save()
         pubsub.publish('BOOK_ADDED', { bookAdded: book })
         return book

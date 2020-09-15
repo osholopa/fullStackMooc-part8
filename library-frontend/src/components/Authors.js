@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { EDIT_AUTHOR, ALL_AUTHORS } from '../queries'
 
-const Authors = ({ show, authors, setError }) => {
+const Authors = ({ show, authors }) => {
   const [name, setName] = useState('')
   const [born, setBorn] = useState('')
 

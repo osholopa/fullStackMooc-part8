@@ -155,27 +155,19 @@ const App = () => {
         )}
       </div>
       {error ? <div style={{ color: 'red' }}>{error}</div> : null}
-      <Authors
-        show={page === 'authors'}
-        authors={authors.data.allAuthors}
-        setError={setError}
-      />
+      <Authors show={page === 'authors'} authors={authors.data.allAuthors} />
       <Books
         show={page === 'books'}
         books={books.data.allBooks}
         genres={genres.data.allGenres}
       />
       <LoginForm {...loginFormProps} />
-      {favouriteGenre ? (
-        <>
-          <NewBook show={page === 'add'} updateCacheWith={updateCacheWith} />
-          <Recommendations
-            show={page === 'recommendations'}
-            favouriteGenre={favouriteGenre}
-            favouriteBooks={favouriteBooks}
-          />
-        </>
-      ) : null}
+      <NewBook show={page === 'add'} updateCacheWith={updateCacheWith} />
+      <Recommendations
+        show={page === 'recommendations'}
+        favouriteGenre={favouriteGenre}
+        favouriteBooks={favouriteBooks}
+      />
     </div>
   )
 }
