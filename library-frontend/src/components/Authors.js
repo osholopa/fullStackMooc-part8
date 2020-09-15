@@ -2,16 +2,17 @@ import React, { useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { EDIT_AUTHOR, ALL_AUTHORS } from '../queries'
 
-const Authors = (props) => {
+const Authors = ({ show, authors, setError }) => {
   const [name, setName] = useState('')
   const [born, setBorn] = useState('')
-
-  const authors = props.authors
 
   const [editAuthor] = useMutation(EDIT_AUTHOR, {
     refetchQueries: [{ query: ALL_AUTHORS }],
     onError: (error) => {
-      console.log(error.graphQLErrors)
+      setError(error.graphQLErrors[0].message)
+      setTimeout(() => {
+        setError(null)
+      }, 5000)
     },
   })
 
@@ -22,7 +23,7 @@ const Authors = (props) => {
     setBorn('')
   }
 
-  if (!props.show) {
+  if (!show) {
     return null
   }
   return (
