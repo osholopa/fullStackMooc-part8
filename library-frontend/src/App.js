@@ -3,9 +3,14 @@ import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import Recommendations from './components/Recommendations'
-import { useApolloClient, useQuery, useLazyQuery } from '@apollo/client'
+import {
+  useApolloClient,
+  useQuery,
+  useLazyQuery,
+  useSubscription,
+} from '@apollo/client'
 import LoginForm from './components/LoginForm'
-import { ALL_AUTHORS, ALL_BOOKS, ALL_GENRES, ME } from './queries'
+import { ALL_AUTHORS, ALL_BOOKS, ALL_GENRES, ME, BOOK_ADDED } from './queries'
 
 const App = () => {
   const [token, setToken] = useState(null)
@@ -18,6 +23,16 @@ const App = () => {
   const genres = useQuery(ALL_GENRES)
 
   const client = useApolloClient()
+
+  useSubscription(BOOK_ADDED, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      let book = subscriptionData.data.bookAdded
+      console.log('book added', book)
+      window.alert(
+        `New book added: ${book.title} by ${book.author.name}. Check browser console for more info`
+      )
+    },
+  })
 
   const [getUser, result] = useLazyQuery(ME, {
     onCompleted: () => {
