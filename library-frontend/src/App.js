@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import Recommendations from './components/Recommendations'
-import { useApolloClient, useQuery } from '@apollo/client'
+import { useApolloClient, useQuery, useLazyQuery } from '@apollo/client'
 import LoginForm from './components/LoginForm'
-import { ALL_AUTHORS, ALL_BOOKS, ALL_GENRES } from './queries'
+import { ALL_AUTHORS, ALL_BOOKS, ALL_GENRES, ME } from './queries'
 
 const App = () => {
   const [token, setToken] = useState(null)
@@ -15,15 +15,30 @@ const App = () => {
   const books = useQuery(ALL_BOOKS)
   const genres = useQuery(ALL_GENRES)
   const client = useApolloClient()
+  const [favouriteGenre, setFavouriteGenre] = useState(null)
+  const [getUser, result] = useLazyQuery(ME, {
+    onCompleted: () => {
+      setFavouriteGenre(result.data.me.favouriteGenre)
+    },
+  })
+
+  useEffect(() => {
+    if (localStorage.getItem('library-user-token')) {
+      setToken(localStorage.getItem('library-user-token'))
+    }
+  }, [])
+
+  useEffect(() => {
+    if (token) {
+      getUser()
+    }
+  }, [token]) //eslint-disable-line
 
   const logout = () => {
+    setPage('authors')
     setToken(null)
     localStorage.clear()
     client.resetStore()
-  }
-
-  if (authors.loading || books.loading) {
-    return <div>loading...</div>
   }
 
   const loginFormProps = {
@@ -31,6 +46,10 @@ const App = () => {
     setError: setError,
     setToken: setToken,
     setPage: setPage,
+  }
+
+  if (authors.loading || books.loading) {
+    return <div>loading...</div>
   }
 
   return (
@@ -68,11 +87,13 @@ const App = () => {
       <LoginForm {...loginFormProps} />
 
       <NewBook show={page === 'add'} setError={setError} />
-
-      <Recommendations
-        show={page === 'recommendations'}
-        books={books.data.allBooks}
-      />
+      {favouriteGenre ? (
+        <Recommendations
+          show={page === 'recommendations'}
+          favouriteGenre={favouriteGenre}
+          setError={setError}
+        />
+      ) : null}
     </div>
   )
 }

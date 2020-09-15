@@ -11,7 +11,7 @@ const Books = ({ show, books, genres }) => {
     } else {
       setBooksToShow(books)
     }
-  }, [genre]) //eslint-disable-line
+  }, [genre, books]) //eslint-disable-line
 
   if (!show) {
     return null
