@@ -10,7 +10,14 @@ import {
   useSubscription,
 } from '@apollo/client'
 import LoginForm from './components/LoginForm'
-import { ALL_AUTHORS, ALL_BOOKS, ALL_GENRES, ME, BOOK_ADDED } from './queries'
+import {
+  ALL_AUTHORS,
+  ALL_BOOKS,
+  ALL_GENRES,
+  ME,
+  BOOK_ADDED,
+  BOOKS_BY_GENRE,
+} from './queries'
 
 const App = () => {
   const [token, setToken] = useState(null)
@@ -24,22 +31,6 @@ const App = () => {
 
   const client = useApolloClient()
 
-  useSubscription(BOOK_ADDED, {
-    onSubscriptionData: ({ subscriptionData }) => {
-      let book = subscriptionData.data.bookAdded
-      console.log('book added', book)
-      window.alert(
-        `New book added: ${book.title} by ${book.author.name}. Check browser console for more info`
-      )
-    },
-  })
-
-  const [getUser, result] = useLazyQuery(ME, {
-    onCompleted: () => {
-      setFavouriteGenre(result.data.me.favouriteGenre)
-    },
-  })
-
   useEffect(() => {
     if (localStorage.getItem('library-user-token')) {
       setToken(localStorage.getItem('library-user-token'))
@@ -51,6 +42,81 @@ const App = () => {
       getUser()
     }
   }, [token]) //eslint-disable-line
+
+  const [getBooksByGenre, favouriteBooksResult] = useLazyQuery(BOOKS_BY_GENRE, {
+    onError: (error) => {
+      console.log(error)
+    },
+  })
+
+  useSubscription(BOOK_ADDED, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      let book = subscriptionData.data.bookAdded
+      console.log('book added', book)
+      window.alert(
+        `New book added: ${book.title} by ${book.author.name}. Check browser console for more info`
+      )
+      updateCacheWith(book)
+    },
+  })
+
+  const [favouriteBooks, setFavouriteBooks] = useState(null)
+
+  useEffect(() => {
+    if (favouriteBooksResult.data) {
+      setFavouriteBooks(favouriteBooksResult.data.allBooks)
+    }
+  }, [favouriteBooksResult.data])
+
+  const [getUser, user] = useLazyQuery(ME, {
+    onCompleted: () => {
+      setFavouriteGenre(user.data.me.favouriteGenre)
+    },
+  })
+
+  useEffect(() => {
+    if (favouriteGenre) {
+      getBooksByGenre({ variables: { genre: favouriteGenre } })
+    }
+  }, [favouriteGenre]) //eslint-disable-line
+
+  const updateCacheWith = (addedBook) => {
+    const bookIncludedIn = (set, object) =>
+      set.map((b) => b.id).includes(object.id)
+    const booksInStore = client.readQuery({ query: ALL_BOOKS })
+    if (!bookIncludedIn(booksInStore.allBooks, addedBook)) {
+      client.writeQuery({
+        query: ALL_BOOKS,
+        data: { allBooks: booksInStore.allBooks.concat(addedBook) },
+      })
+    }
+    const authorIncludedIn = (set, object) =>
+      set.map((b) => b.id).includes(object.author.id)
+    const authorsInStore = client.readQuery({ query: ALL_AUTHORS })
+    if (!authorIncludedIn(authorsInStore.allAuthors, addedBook)) {
+      client.writeQuery({
+        query: ALL_AUTHORS,
+        data: {
+          allAuthors: authorsInStore.allAuthors.concat(addedBook.author),
+        },
+      })
+    }
+    if (favouriteGenre && addedBook.genres.includes(favouriteGenre)) {
+      const favouriteBooksInStore = client.readQuery({
+        query: BOOKS_BY_GENRE,
+        variables: { genre: favouriteGenre },
+      })
+      if (!bookIncludedIn(favouriteBooksInStore.allBooks, addedBook)) {
+        client.writeQuery({
+          query: BOOKS_BY_GENRE,
+          variables: { genre: favouriteGenre },
+          data: {
+            allBooks: favouriteBooksInStore.allBooks.concat(addedBook),
+          },
+        })
+      }
+    }
+  }
 
   const logout = () => {
     setPage('authors')
@@ -88,33 +154,25 @@ const App = () => {
           <button onClick={() => setPage('login')}>login</button>
         )}
       </div>
-
       {error ? <div style={{ color: 'red' }}>{error}</div> : null}
-
       <Authors
         show={page === 'authors'}
         authors={authors.data.allAuthors}
         setError={setError}
       />
-
       <Books
         show={page === 'books'}
         books={books.data.allBooks}
         genres={genres.data.allGenres}
       />
-
       <LoginForm {...loginFormProps} />
       {favouriteGenre ? (
         <>
-          <NewBook
-            show={page === 'add'}
-            setError={setError}
-            favouriteGenre={favouriteGenre}
-          />
-
+          <NewBook show={page === 'add'} updateCacheWith={updateCacheWith} />
           <Recommendations
             show={page === 'recommendations'}
             favouriteGenre={favouriteGenre}
+            favouriteBooks={favouriteBooks}
           />
         </>
       ) : null}

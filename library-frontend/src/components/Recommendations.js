@@ -1,30 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import Booklist from './Booklist'
-import { useLazyQuery } from '@apollo/client'
-import { BOOKS_BY_GENRE } from '../queries'
 
-const Recommendations = ({ show, favouriteGenre }) => {
-  const [favouriteBooks, setFavouriteBooks] = useState(null)
-
-  const [getBooksByGenre, result] = useLazyQuery(BOOKS_BY_GENRE, {
-    onError: (error) => {
-      console.log(error)
-    },
-  })
-
-  useEffect(() => {
-    if (result.data) {
-      setFavouriteBooks(result.data.allBooks)
-    }
-  }, [result.data])
-
-  useEffect(() => {
-    if (show && favouriteGenre) {
-      getBooksByGenre({ variables: { genre: favouriteGenre } })
-    }
-  }, [show, favouriteGenre]) //eslint-disable-line
-
-  if (!show || !favouriteBooks) return null
+const Recommendations = ({ show, favouriteGenre, favouriteBooks }) => {
+  if (!show) return null
 
   return (
     <div>
