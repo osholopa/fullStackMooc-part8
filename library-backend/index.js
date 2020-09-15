@@ -40,6 +40,18 @@ const resolvers = {
       return books
     },
     allAuthors: () => Author.find({}),
+    allGenres: async () => {
+      const books = await Book.find({})
+      let genres = []
+      books.forEach((book) => {
+        book.genres.forEach((genre) => {
+          if (!genres.includes(genre)) {
+            genres = genres.concat(genre)
+          }
+        })
+      })
+      return genres
+    },
     me: (root, args, context) => {
       return context.currentUser
     },

@@ -63,3 +63,9 @@ export const LOGIN = gql`
     }
   }
 `
+
+export const ALL_GENRES = gql`
+  query {
+    allGenres
+  }
+`

@@ -4,7 +4,7 @@ import Books from './components/Books'
 import NewBook from './components/NewBook'
 import { useApolloClient, useQuery } from '@apollo/client'
 import LoginForm from './components/LoginForm'
-import { ALL_AUTHORS, ALL_BOOKS } from './queries'
+import { ALL_AUTHORS, ALL_BOOKS, ALL_GENRES } from './queries'
 
 const App = () => {
   const [token, setToken] = useState(null)
@@ -12,6 +12,7 @@ const App = () => {
   const [error, setError] = useState(null)
   const authors = useQuery(ALL_AUTHORS)
   const books = useQuery(ALL_BOOKS)
+  const genres = useQuery(ALL_GENRES)
   const client = useApolloClient()
 
   const logout = () => {
@@ -54,7 +55,11 @@ const App = () => {
         setError={setError}
       />
 
-      <Books show={page === 'books'} books={books.data.allBooks} />
+      <Books
+        show={page === 'books'}
+        books={books.data.allBooks}
+        genres={genres.data.allGenres}
+      />
 
       <LoginForm {...loginFormProps} />
 
