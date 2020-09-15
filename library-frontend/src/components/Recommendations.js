@@ -3,30 +3,28 @@ import Booklist from './Booklist'
 import { useLazyQuery } from '@apollo/client'
 import { BOOKS_BY_GENRE } from '../queries'
 
-const Recommendations = ({ show, favouriteGenre, setError }) => {
-  const [books, setBooks] = useState([])
+const Recommendations = ({ show, favouriteGenre }) => {
+  const [favouriteBooks, setFavouriteBooks] = useState(null)
+
   const [getBooksByGenre, result] = useLazyQuery(BOOKS_BY_GENRE, {
     onError: (error) => {
-      setError(error)
-      setTimeout(() => {
-        setError(null)
-      }, 5000)
+      console.log(error)
     },
   })
+
+  useEffect(() => {
+    if (result.data) {
+      setFavouriteBooks(result.data.allBooks)
+    }
+  }, [result.data])
 
   useEffect(() => {
     if (show && favouriteGenre) {
       getBooksByGenre({ variables: { genre: favouriteGenre } })
     }
-  }, [show]) //eslint-disable-line
+  }, [show, favouriteGenre]) //eslint-disable-line
 
-  useEffect(() => {
-    if (result.data) {
-      setBooks(result.data.allBooks)
-    }
-  }, [result.data])
-
-  if (!show || !favouriteGenre) return null
+  if (!show || !favouriteBooks) return null
 
   return (
     <div>
@@ -34,7 +32,7 @@ const Recommendations = ({ show, favouriteGenre, setError }) => {
       <p>
         books in your favourite genre <b>{favouriteGenre}</b>
       </p>
-      <Booklist books={books} />
+      <Booklist books={favouriteBooks} />
     </div>
   )
 }

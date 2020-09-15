@@ -11,11 +11,14 @@ const App = () => {
   const [token, setToken] = useState(null)
   const [page, setPage] = useState('authors')
   const [error, setError] = useState(null)
+  const [favouriteGenre, setFavouriteGenre] = useState(null)
+
   const authors = useQuery(ALL_AUTHORS)
   const books = useQuery(ALL_BOOKS)
   const genres = useQuery(ALL_GENRES)
+
   const client = useApolloClient()
-  const [favouriteGenre, setFavouriteGenre] = useState(null)
+
   const [getUser, result] = useLazyQuery(ME, {
     onCompleted: () => {
       setFavouriteGenre(result.data.me.favouriteGenre)
@@ -37,6 +40,7 @@ const App = () => {
   const logout = () => {
     setPage('authors')
     setToken(null)
+    setFavouriteGenre(null)
     localStorage.clear()
     client.resetStore()
   }
@@ -85,14 +89,19 @@ const App = () => {
       />
 
       <LoginForm {...loginFormProps} />
-
-      <NewBook show={page === 'add'} setError={setError} />
       {favouriteGenre ? (
-        <Recommendations
-          show={page === 'recommendations'}
-          favouriteGenre={favouriteGenre}
-          setError={setError}
-        />
+        <>
+          <NewBook
+            show={page === 'add'}
+            setError={setError}
+            favouriteGenre={favouriteGenre}
+          />
+
+          <Recommendations
+            show={page === 'recommendations'}
+            favouriteGenre={favouriteGenre}
+          />
+        </>
       ) : null}
     </div>
   )
